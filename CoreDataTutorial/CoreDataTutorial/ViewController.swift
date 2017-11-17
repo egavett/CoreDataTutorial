@@ -20,6 +20,16 @@ class ViewController: UIViewController {
         title = "The Party"
         tableView.register(UITableViewCell.self,
                            forCellReuseIdentifier: "Cell")
+        
+        // Load CoreData
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+        let managedContext = appDelegate.persistentContainer.viewContext
+        let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Person")
+        do {
+            people = try managedContext.fetch(fetchRequest)
+        } catch let error as NSError {
+            print("Could not save. \(error), \(error.userInfo)")
+        }
     }
     
     func save(name: String) {
@@ -30,6 +40,7 @@ class ViewController: UIViewController {
                                                 in: managedContext)!
         let person = NSManagedObject(entity: entity,
                                      insertInto: managedContext)
+        person.setValue(name, forKey: "name")
         
         do {
             try managedContext.save()
@@ -64,6 +75,10 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: UITableViewDataSource {
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return people.count
